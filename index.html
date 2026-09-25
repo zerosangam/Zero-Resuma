@@ -11,938 +11,12 @@
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300..700;1,300..700&family=Press+Start+2P&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-  <style>
-    /* ============================================================
-       0. DESIGN TOKENS — DARK RETRO DEVELOPER DASHBOARD
-       ============================================================ */
-    :root {
-      /* Backgrounds */
-      --bg-primary: #0B0F14;
-      --bg-surface: #161B22;
-      --bg-surface-hover: #1C2129;
-      --bg-inset: #0D1117;
-
-      /* Borders */
-      --border: #2A313A;
-      --border-subtle: #21262D;
-      --border-focus: #E8754F;
-
-      /* Text */
-      --text-primary: #E6EDF3;
-      --text-secondary: #8B949E;
-      --text-dim: #5A626B;
-
-      /* Accents */
-      --accent-orange: #E8754F;
-      --accent-orange-dim: #C55A36;
-      --accent-green: #3FB950;
-      --accent-purple: #A371F7;
-      --accent-blue: #58A6FF;
-      --accent-amber: #D29922;
-
-      /* Radius */
-      --radius-sm: 6px;
-      --radius-md: 8px;
-      --radius-lg: 12px;
-      --radius-pill: 999px;
-
-      /* Spacing */
-      --space-1: 4px;
-      --space-2: 8px;
-      --space-3: 12px;
-      --space-4: 16px;
-      --space-5: 24px;
-      --space-6: 32px;
-      --space-7: 48px;
-      --space-8: 64px;
-      --space-9: 80px;
-
-      --container: 1100px;
-      --pad-inline: clamp(16px, 4vw, 32px);
-      --pad-section: clamp(40px, 6vw, 72px);
-      --header-h: 62px;
-
-      --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-
-    body {
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      font-family: 'JetBrains Mono', 'IBM Plex Mono', 'Space Mono', monospace;
-      overflow-x: hidden;
-      min-height: 100vh;
-      line-height: 1.65;
-      -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
-    }
-
-    ::selection { background: var(--accent-orange); color: var(--bg-primary); }
-    a { color: inherit; text-decoration: none; }
-    ul { list-style: none; }
-    img { max-width: 100%; display: block; }
-    button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
-
-    /* Scrollbar */
-    ::-webkit-scrollbar { width: 10px; }
-    ::-webkit-scrollbar-track { background: var(--bg-primary); }
-    ::-webkit-scrollbar-thumb {
-      background: #2A313A;
-      border-radius: var(--radius-pill);
-      border: 2px solid var(--bg-primary);
-    }
-    ::-webkit-scrollbar-thumb:hover { background: #3A414A; }
-
-    /* Utility */
-    .mono {
-      font-family: 'JetBrains Mono', monospace;
-      letter-spacing: 0.03em;
-    }
-
-    .gradient-text { color: var(--accent-orange); }
-
-    /* ============================================================
-       1. BACKGROUND SYSTEM — DARK, SUBTLE GRID
-       ============================================================ */
-    .bg-layer { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
-    .bg-base { background: var(--bg-primary); }
-    .bg-grain { opacity: 0.015; mix-blend-mode: overlay; }
-    .bg-grid {
-      background-image:
-        linear-gradient(rgba(255, 255, 255, 0.022) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.022) 1px, transparent 1px);
-      background-size: 48px 48px;
-      -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, #000 20%, transparent 78%);
-      mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, #000 20%, transparent 78%);
-    }
-
-    #particlesCanvas { display: none; }
-
-    /* ============================================================
-       2. SCROLL PROGRESS
-       ============================================================ */
-    .scroll-progress {
-      position: fixed; top: 0; left: 0; height: 2px; width: 0%;
-      background: var(--accent-orange);
-      z-index: 1000;
-      transition: width 0.1s linear;
-    }
-
-    /* ============================================================
-       3. CUSTOM CURSOR — DISABLED (default cursor kept)
-       ============================================================ */
-    .cursor-dot, .cursor-ring { display: none !important; }
-
-    /* ============================================================
-       4. LAYOUT SHELL
-       ============================================================ */
-    .container {
-      max-width: var(--container);
-      margin-inline: auto;
-      padding-inline: var(--pad-inline);
-      position: relative;
-      z-index: 1;
-    }
-    section {
-      padding-block: var(--pad-section);
-      position: relative;
-      z-index: 1;
-      scroll-margin-top: calc(var(--header-h) + 16px);
-    }
-    .divider {
-      height: 1px;
-      background: var(--border-subtle);
-      position: relative;
-      z-index: 1;
-    }
-
-    /* ============================================================
-       5. NAV — DEVELOPER DASHBOARD TOP BAR
-       ============================================================ */
-    header {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      padding: var(--space-3) var(--pad-inline);
-      display: flex; justify-content: space-between; align-items: center;
-      gap: var(--space-3);
-      background: rgba(11, 15, 20, 0.92);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      border-bottom: 1px solid var(--border-subtle);
-      transition: background 0.3s ease, border-color 0.3s ease;
-    }
-    header.scrolled {
-      background: rgba(11, 15, 20, 0.98);
-      border-bottom-color: var(--border);
-    }
-    .logo {
-      font-family: 'Press Start 2P', 'JetBrains Mono', monospace;
-      font-weight: 400;
-      font-size: 0.85rem;
-      letter-spacing: 0.05em;
-      display: inline-block;
-      color: var(--text-primary);
-      white-space: nowrap;
-    }
-    .logo .gradient-text { color: var(--accent-orange); }
-
-    nav ul { display: flex; gap: var(--space-5); align-items: center; }
-    nav a {
-      font-size: 0.74rem;
-      color: var(--text-secondary);
-      transition: color 0.2s ease;
-      display: inline-block;
-      position: relative;
-      font-family: 'JetBrains Mono', monospace;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
-    nav a:hover, nav a:focus-visible, nav a.active { color: var(--text-primary); }
-    nav a::after {
-      content: '';
-      position: absolute;
-      bottom: -5px; left: 0;
-      width: 0%; height: 1px;
-      background: var(--accent-orange);
-      transition: width 0.2s ease;
-    }
-    nav a:hover::after, nav a.active::after { width: 100%; }
-
-    /* ============================================================
-       6. HERO — RETRO TERMINAL HEADER
-       ============================================================ */
-    .hero {
-      min-height: 100vh;
-      display: grid;
-      grid-template-columns: 1.4fr 1fr;
-      gap: var(--space-7);
-      align-items: center;
-      padding-top: calc(var(--header-h) + 56px);
-    }
-    .hero-content { max-width: 680px; }
-    .eyebrow {
-      color: var(--accent-orange);
-      margin-bottom: var(--space-3);
-      display: inline-flex; align-items: center; gap: 8px;
-      font-size: 0.7rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-    .eyebrow::before {
-      content: '>';
-      color: var(--accent-orange);
-      font-weight: 700;
-      font-size: 0.9rem;
-    }
-    .hero-name {
-      font-family: 'JetBrains Mono', monospace;
-      color: var(--text-secondary);
-      font-size: clamp(0.9rem, 1.4vw, 1.1rem);
-      margin-bottom: var(--space-2);
-      font-weight: 400;
-      letter-spacing: 0.04em;
-    }
-    .hero-alias {
-      font-family: 'Press Start 2P', 'JetBrains Mono', monospace;
-      font-weight: 400;
-      font-size: clamp(2.4rem, 7vw, 5rem);
-      letter-spacing: 0.02em;
-      line-height: 1.15;
-      margin-bottom: var(--space-4);
-      display: block;
-      color: var(--accent-orange);
-      text-shadow: 4px 4px 0 rgba(232, 117, 79, 0.22);
-    }
-    .hero-alias .letter { display: inline-block; }
-
-    .hero-headline {
-      font-family: 'JetBrains Mono', monospace;
-      font-weight: 700;
-      font-size: clamp(1.05rem, 2.2vw, 1.5rem);
-      letter-spacing: -0.01em;
-      margin-bottom: var(--space-2);
-      max-width: 820px;
-      color: var(--text-primary);
-    }
-    .hero-sub {
-      color: var(--text-secondary);
-      font-size: clamp(0.85rem, 1.1vw, 0.98rem);
-      max-width: 540px;
-      margin-bottom: var(--space-5);
-      line-height: 1.75;
-    }
-    .status-pill {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 6px 14px;
-      border-radius: var(--radius-pill);
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      font-size: 0.7rem;
-      color: var(--text-secondary);
-      margin-bottom: var(--space-5);
-      width: fit-content;
-      font-family: 'JetBrains Mono', monospace;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-    .status-dot {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: var(--accent-green);
-      box-shadow: 0 0 6px var(--accent-green);
-      animation: pulse 2s ease-in-out infinite;
-      flex: none;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.45; transform: scale(0.8); }
-    }
-    .hero-ctas { display: flex; gap: var(--space-3); flex-wrap: wrap; }
-
-    /* HERO PORTRAIT — RETRO TERMINAL FRAME */
-    .hero-portrait {
-      position: relative;
-      display: flex; align-items: center; justify-content: center;
-      aspect-ratio: 1; max-width: 360px; width: 100%;
-      margin-inline: auto; justify-self: end;
-    }
-    .portrait-img {
-      position: relative; width: 100%; height: 100%;
-      border-radius: var(--radius-lg);
-      object-fit: cover; object-position: center;
-      border: 1px solid var(--border);
-      box-shadow: 0 0 0 6px var(--bg-primary), 0 0 0 7px var(--border-subtle);
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
-      z-index: 1;
-      background: var(--bg-surface);
-    }
-    .hero-portrait:hover .portrait-img {
-      border-color: var(--accent-orange);
-      box-shadow: 0 0 0 6px var(--bg-primary), 0 0 0 7px rgba(232, 117, 79, 0.45);
-    }
-    .portrait-badge {
-      position: absolute; bottom: 8%; right: -4%;
-      padding: 6px 14px;
-      border-radius: var(--radius-pill);
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.62rem;
-      letter-spacing: 0.1em;
-      color: var(--accent-green);
-      z-index: 2;
-      display: inline-flex; align-items: center; gap: 6px;
-      white-space: nowrap;
-      text-transform: uppercase;
-    }
-    .portrait-badge::before {
-      content: '';
-      width: 5px; height: 5px; border-radius: 50%;
-      background: var(--accent-green);
-      box-shadow: 0 0 6px var(--accent-green);
-      animation: pulse 2s ease-in-out infinite;
-      flex: none;
-    }
-
-    /* ==================== BUTTONS ==================== */
-    .btn {
-      position: relative;
-      padding: 10px 20px;
-      border-radius: var(--radius-md);
-      font-size: 0.76rem;
-      font-weight: 600;
-      display: inline-flex; align-items: center; gap: 8px;
-      transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-      font-family: 'JetBrains Mono', monospace;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      border: 1px solid transparent;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-    .btn-primary {
-      background: var(--accent-orange);
-      color: #120C08;
-      font-weight: 700;
-      border-color: var(--accent-orange);
-    }
-    .btn-primary:hover {
-      background: var(--accent-orange-dim);
-      border-color: var(--accent-orange-dim);
-    }
-    .btn-secondary {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      color: var(--text-primary);
-    }
-    .btn-secondary:hover {
-      background: var(--bg-surface-hover);
-      border-color: var(--accent-orange);
-      color: var(--accent-orange);
-    }
-
-    /* ============================================================
-       7. MARQUEE / QUOTE
-       ============================================================ */
-    .premium-marquee {
-      width: 100%; overflow: hidden; white-space: nowrap; padding: 14px 0;
-      border-block: 1px solid var(--border-subtle);
-      background: var(--bg-inset);
-      position: relative;
-      z-index: 1;
-    }
-    .premium-marquee span {
-      display: inline-block;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: clamp(0.72rem, 1.2vw, 0.85rem);
-      font-weight: 400;
-      font-style: normal;
-      letter-spacing: 0.08em;
-      color: var(--text-secondary);
-      animation: premiumMarquee 48s linear infinite;
-      text-transform: uppercase;
-      padding-left: 100%;
-    }
-    @keyframes premiumMarquee {
-      from { transform: translateX(0); }
-      to { transform: translateX(-100%); }
-    }
-
-    /* ============================================================
-       8. BENTO / CARDS — DARK DEVELOPER PANELS
-       ============================================================ */
-    .bento {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: var(--space-4);
-    }
-    .card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-lg);
-      padding: var(--space-5);
-      position: relative;
-      overflow: hidden;
-      transition: border-color 0.25s ease, background 0.25s ease;
-    }
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 20px; right: 20px;
-      height: 1px;
-      background: transparent;
-      transition: background 0.25s ease;
-    }
-    .card:hover {
-      border-color: var(--border);
-      background: var(--bg-surface-hover);
-    }
-    .card:hover::before { background: var(--accent-orange); }
-
-    .card-span-2 { grid-column: span 2; }
-    .card-span-4 { grid-column: span 4; }
-
-    /* ============================================================
-       9. SECTION HEADERS
-       ============================================================ */
-    .section-label {
-      color: var(--accent-orange);
-      margin-bottom: var(--space-2);
-      font-size: 0.7rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      display: flex; align-items: center; gap: 8px;
-    }
-    .section-label::before {
-      content: '//';
-      color: var(--accent-orange);
-      font-weight: 700;
-    }
-    .section-title {
-      font-family: 'Press Start 2P', 'JetBrains Mono', monospace;
-      font-weight: 400;
-      font-size: clamp(1.5rem, 3.4vw, 2.6rem);
-      letter-spacing: 0.02em;
-      margin-bottom: var(--space-6);
-      max-width: 700px;
-      color: var(--text-primary);
-      text-shadow: 3px 3px 0 rgba(232, 117, 79, 0.18);
-      line-height: 1.35;
-    }
-
-    /* ============================================================
-       10. PROJECTS
-       ============================================================ */
-    .project-card {
-      min-height: 270px;
-      display: flex; flex-direction: column; justify-content: space-between;
-      cursor: pointer;
-    }
-
-    .project-top {
-      display: flex; justify-content: space-between; align-items: flex-start;
-      margin-bottom: var(--space-4);
-    }
-    .project-index {
-      font-family: 'JetBrains Mono', monospace;
-      color: var(--text-dim);
-      font-size: 0.7rem;
-      letter-spacing: 0.08em;
-    }
-    .project-number {
-      font-family: 'Press Start 2P', 'JetBrains Mono', monospace;
-      font-size: 1.6rem;
-      font-weight: 400;
-      color: rgba(232, 117, 79, 0.14);
-      line-height: 1;
-    }
-    .project-title {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: clamp(1.3rem, 2.4vw, 1.9rem);
-      font-weight: 700;
-      letter-spacing: -0.01em;
-      margin-top: var(--space-2);
-      color: var(--accent-orange);
-      overflow-wrap: anywhere;
-    }
-    .project-desc {
-      color: var(--text-secondary);
-      margin-top: var(--space-3);
-      max-width: 520px;
-      font-size: 0.83rem;
-      line-height: 1.75;
-    }
-    .project-bottom {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-top: var(--space-5);
-      flex-wrap: wrap; gap: var(--space-3);
-    }
-    .project-tags { display: flex; gap: 6px; flex-wrap: wrap; }
-    .project-tags span {
-      font-size: 0.62rem;
-      padding: 4px 10px;
-      border-radius: var(--radius-pill);
-      border: 1px solid var(--border);
-      color: var(--text-secondary);
-      font-family: 'JetBrains Mono', monospace;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      background: var(--bg-inset);
-      transition: color 0.2s ease, border-color 0.2s ease;
-    }
-    .project-card:hover .project-tags span { color: var(--text-primary); }
-    .project-tags span:nth-child(3n+1) { border-color: rgba(232, 117, 79, 0.35); }
-    .project-tags span:nth-child(3n+2) { border-color: rgba(88, 166, 255, 0.3); }
-    .project-tags span:nth-child(3n+3) { border-color: rgba(163, 113, 247, 0.3); }
-
-    .explore-link {
-      display: inline-flex; align-items: center; gap: 6px;
-      font-size: 0.72rem;
-      font-weight: 600;
-      color: var(--accent-orange);
-      transition: gap 0.2s ease, color 0.2s ease;
-      font-family: 'JetBrains Mono', monospace;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
-    .explore-link i { transition: transform 0.2s ease; }
-    .explore-link:hover i { transform: translateX(3px); }
-
-    /* ============================================================
-       11. SKILLS / ARSENAL — DARK CHIPS WITH BRAND ACCENTS
-       ============================================================ */
-    .skills-section {
-      max-width: var(--container);
-      margin-inline: auto;
-      padding-inline: var(--pad-inline);
-      padding-block: var(--pad-section);
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: var(--space-4);
-      align-content: start;
-      text-align: center;
-      position: relative;
-      z-index: 1;
-    }
-
-    .skill-group {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-lg);
-      padding: var(--space-4) var(--space-4) var(--space-5);
-      transition: border-color 0.25s ease, background 0.25s ease;
-    }
-    .skill-group:hover {
-      border-color: var(--border);
-      background: var(--bg-surface-hover);
-    }
-
-    .skill-group h3 {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      margin: 0 0 var(--space-4);
-      padding: 5px 14px;
-      border-radius: var(--radius-pill);
-      background: var(--bg-inset);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-secondary);
-      font-size: 0.68rem;
-      font-weight: 600;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      font-family: 'JetBrains Mono', monospace;
-    }
-    .skill-group h3::before {
-      content: '//';
-      color: var(--accent-orange);
-      font-weight: 700;
-    }
-
-    .skill-row {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .skill-box {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 9px;
-      min-height: 38px;
-      padding: 0 14px;
-      background: var(--bg-inset);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-      color: var(--text-secondary);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.7rem;
-      font-weight: 500;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      white-space: nowrap;
-      transition: border-color 0.2s ease, background 0.2s ease,
-                  color 0.2s ease, transform 0.2s ease;
-    }
-    .skill-box:hover {
-      background: var(--bg-surface-hover);
-      border-color: var(--brand, var(--accent-orange));
-      color: var(--text-primary);
-      transform: translateY(-2px);
-    }
-
-    .skill-box i { font-size: 15px; }
-    .skill-box i,
-    .skill-box strong,
-    .skill-box .tw,
-    .skill-box span:first-child:not(:last-child) {
-      color: var(--brand, var(--accent-orange));
-    }
-    .skill-box strong { font-size: 15px; font-weight: 700; }
-    .skill-box .tw { font-size: 17px; font-weight: 700; }
-
-    /* ============ BRAND ACCENTS (dark chips, colored glyphs) ============ */
-    .c          { --brand: #5C9FD6; }
-    .python     { --brand: #4B8BBE; }
-    .javascript { --brand: #F7DF1E; }
-    .html5      { --brand: #E34F26; }
-    .css3       { --brand: #2965F1; }
-    .react      { --brand: #61DAFB; }
-    .tailwind   { --brand: #38BDF8; }
-    .bootstrap  { --brand: #A371F7; }
-    .node       { --brand: #3FB950; }
-    .express    { --brand: #9CA3AF; }
-    .mongodb    { --brand: #4DB33D; }
-    .sqlite     { --brand: #58A6FF; }
-    .git        { --brand: #F05033; }
-    .github     { --brand: #E6EDF3; }
-    .docker     { --brand: #2496ED; }
-    .render     { --brand: #46E3B7; }
-    .vercel     { --brand: #E6EDF3; }
-    .n8n        { --brand: #EF5277; }
-    .telegram   { --brand: #29A9EB; }
-    .vscode     { --brand: #3B9BE8; }
-    .linux      { --brand: #F5C51D; }
-    .windows    { --brand: #58A6FF; }
-    .postman    { --brand: #FF6C37; }
-    .figma      { --brand: #F24E1E; }
-    .canva      { --brand: #00C4CC; }
-
-    /* ============================================================
-       12. CONTACT / FOOTER
-       ============================================================ */
-    .contact {
-      text-align: center;
-      display: flex; flex-direction: column; align-items: center;
-    }
-    .contact .section-label { justify-content: center; }
-    .contact-statement {
-      font-family: 'Press Start 2P', 'JetBrains Mono', monospace;
-      font-weight: 400;
-      font-size: clamp(1.3rem, 3.8vw, 2.5rem);
-      letter-spacing: 0.02em;
-      max-width: 900px;
-      margin-bottom: var(--space-6);
-      line-height: 1.5;
-      text-shadow: 3px 3px 0 rgba(232, 117, 79, 0.18);
-    }
-    .contact-location {
-      color: var(--text-secondary);
-      margin-bottom: var(--space-3);
-      font-size: 0.78rem;
-      font-family: 'JetBrains Mono', monospace;
-      letter-spacing: 0.04em;
-    }
-    .contact-location a { transition: color 0.2s; }
-    .contact-location a:hover { color: var(--accent-orange); }
-
-    .contact-email {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: clamp(0.9rem, 2vw, 1.2rem);
-      margin-bottom: var(--space-6);
-      position: relative;
-      display: inline-block;
-      color: var(--accent-orange);
-      border-bottom: 1px dashed rgba(232, 117, 79, 0.6);
-      padding-bottom: 3px;
-      transition: color 0.2s, border-color 0.2s;
-      overflow-wrap: anywhere;
-      max-width: 100%;
-    }
-    .contact-email:hover {
-      color: var(--accent-orange-dim);
-      border-color: var(--accent-orange-dim);
-    }
-
-    .socials {
-      display: flex; gap: var(--space-3);
-      margin-bottom: var(--space-6);
-      flex-wrap: wrap; justify-content: center;
-    }
-    .social-icon {
-      width: 42px; height: 42px;
-      border-radius: var(--radius-md);
-      display: flex; align-items: center; justify-content: center;
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      font-size: 0.95rem;
-      color: var(--text-secondary);
-      transition: transform 0.2s ease, border-color 0.2s ease,
-                  color 0.2s ease, background 0.2s ease;
-    }
-    .social-icon:hover {
-      border-color: var(--accent-orange);
-      color: var(--accent-orange);
-      background: var(--bg-surface-hover);
-      transform: translateY(-2px);
-    }
-
-    footer {
-      border-top: 1px solid var(--border-subtle);
-      padding: var(--space-5) var(--pad-inline);
-      text-align: center;
-      color: var(--text-dim);
-      font-size: 0.7rem;
-      position: relative;
-      z-index: 1;
-      display: flex; flex-direction: column; gap: var(--space-1);
-      font-family: 'JetBrains Mono', monospace;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-    }
-    footer .footer-heart { color: var(--accent-orange); }
-
-    .back-to-top {
-      position: fixed; bottom: 28px; right: 28px;
-      width: 40px; height: 40px;
-      border-radius: var(--radius-md);
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      color: var(--text-secondary);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 99;
-      opacity: 0; pointer-events: none;
-      transform: translateY(12px);
-      transition: opacity 0.25s ease, transform 0.25s ease,
-                  border-color 0.2s ease, color 0.2s ease;
-      cursor: pointer;
-    }
-    .back-to-top.visible {
-      opacity: 1;
-      pointer-events: auto;
-      transform: translateY(0);
-    }
-    .back-to-top:hover {
-      border-color: var(--accent-orange);
-      color: var(--accent-orange);
-    }
-
-    /* ============================================================
-       13. SCROLL REVEAL — SUBTLE
-       ============================================================ */
-    .reveal {
-      opacity: 0;
-      transform: translateY(16px);
-      transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
-      transition-delay: var(--reveal-delay, 0s);
-    }
-    .reveal.is-visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .reveal { opacity: 1; transform: none; transition: none; }
-      .premium-marquee span { animation: none; padding-left: 0; }
-      .status-dot, .portrait-badge::before { animation: none; }
-    }
-
-    /* ============================================================
-       14. WARNING POPUP & MISC
-       ============================================================ */
-    #warningPopup {
-      position: fixed; top: 16px; right: 16px; z-index: 99999;
-      width: 300px; max-width: calc(100vw - 32px);
-      padding: 16px;
-      background: var(--bg-surface);
-      color: var(--text-primary);
-      border: 1px solid var(--border);
-      border-left: 3px solid var(--accent-orange);
-      border-radius: var(--radius-md);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.75rem;
-      line-height: 1.6;
-    }
-    #warningPopup strong {
-      display: block;
-      margin-bottom: 6px;
-      color: var(--accent-orange);
-      font-size: 0.78rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-    #warningPopup p { color: var(--text-secondary); }
-    #warningPopup button {
-      padding: 6px 14px;
-      border: 1px solid var(--accent-orange);
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      background: transparent;
-      color: var(--accent-orange);
-      font-weight: 600;
-      margin-top: 12px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.7rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      transition: background 0.2s, color 0.2s;
-    }
-    #warningPopup button:hover {
-      background: var(--accent-orange);
-      color: var(--bg-primary);
-    }
-
-    a:focus-visible, button:focus-visible, .project-card:focus-visible, .skill-box:focus-visible {
-      outline: 2px solid var(--accent-orange);
-      outline-offset: 2px;
-      border-radius: var(--radius-sm);
-    }
-    .skip-link {
-      position: absolute; top: -100px; left: 16px;
-      background: var(--accent-orange);
-      color: var(--bg-primary);
-      padding: 8px 14px;
-      border-radius: var(--radius-sm);
-      z-index: 2000;
-      transition: top 0.25s ease;
-      font-weight: 700;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.75rem;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
-    .skip-link:focus { top: 16px; }
-
-    /* ============================================================
-       15. PIXEL FONT ENFORCEMENT
-       ============================================================ */
-    .hero-alias,
-    .section-title,
-    .contact-statement,
-    .logo,
-    .project-number {
-      font-family: 'Press Start 2P', 'JetBrains Mono', monospace;
-      font-weight: 400;
-    }
-
-    /* ============================================================
-       16. RESPONSIVE
-       ============================================================ */
-    @media (max-width: 968px) {
-      .hero {
-        grid-template-columns: 1fr;
-        text-align: center;
-        padding-top: calc(var(--header-h) + 40px);
-        gap: var(--space-6);
-        min-height: auto;
-      }
-      .hero-content { max-width: 100%; margin-inline: auto; }
-      .hero-ctas { justify-content: center; }
-      .status-pill { margin-inline: auto; }
-      .hero-portrait { max-width: 260px; justify-self: center; order: -1; }
-
-      .bento { grid-template-columns: repeat(2, 1fr); }
-      .card-span-2 { grid-column: span 2; }
-      .card-span-4 { grid-column: span 2; }
-    }
-
-    @media (max-width: 640px) {
-      header {
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 10px;
-        padding-block: 10px;
-      }
-      nav ul { gap: 18px; }
-      nav a { font-size: 0.66rem; }
-
-      .hero { padding-top: calc(var(--header-h) + 46px); }
-      .hero-alias { font-size: 2rem; }
-      .section-title { font-size: 1.35rem; }
-      .contact-statement { font-size: 1.05rem; }
-      .project-number { font-size: 1.3rem; }
-      .logo { font-size: 0.72rem; }
-
-      .bento { grid-template-columns: 1fr; }
-      .card-span-2, .card-span-4 { grid-column: span 1; }
-      .card { padding: var(--space-4); }
-
-      .skills-section {
-        grid-template-columns: 1fr;
-        padding-inline: var(--pad-inline);
-      }
-      .skill-group { padding: var(--space-4); }
-      .skill-group h3 { font-size: 0.64rem; }
-      .skill-box {
-        min-height: 34px;
-        padding: 0 11px;
-        font-size: 0.64rem;
-        gap: 7px;
-      }
-      .skill-box i { font-size: 13px; }
-
-      .socials { gap: 10px; }
-      .social-icon { width: 40px; height: 40px; }
-
-      .back-to-top { bottom: 16px; right: 16px; }
-      #warningPopup { width: 260px; right: 8px; top: 8px; padding: 12px; }
-    }
-  </style>
+  <!-- ============ EXTERNAL CSS ============ -->
+  <link rel="stylesheet" href="style.css">
 </head>
+
+
+
 <body>
 
   <!-- ============ WARNING POPUP ============ -->
@@ -990,7 +64,7 @@
 
         <div class="status-pill reveal" style="--reveal-delay:1.06s">
           <span class="status-dot" aria-hidden="true"></span>
-          collaborations
+          <a href="chat.html">AI Chat</a>
         </div>
 
         <div class="hero-ctas reveal" style="--reveal-delay:1.14s">
@@ -1043,7 +117,7 @@
             <div class="project-tags">
               <span>AI</span><span>Web App</span><span>Multi-User</span>
             </div>
-            <a href="https://github.com/zerosangam/zerocloud" target="_blank" class="explore-link" style="text-decoration: none; color: inherit;">
+            <a href="https://github.com/zerosangam/zerocloud" target="_blank" rel="noopener noreferrer" class="explore-link" style="text-decoration: none; color: inherit;">
               Explore <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
             </a>
           </div>
@@ -1057,13 +131,13 @@
           <div>
             <h3 class="project-title gradient-text">Zero-Code</h3>
             <p class="eyebrow mono reveal">Open-Source Development Workspace</p>
-            <p class="project-desc">108 X SORRY THIS IS A <span style="color:var(--accent-orange);">PRIVATE</span></p>
+            <p class="project-desc">A private development workspace for experiments, automation, and personal tooling.</p>
           </div>
           <div class="project-bottom">
             <div class="project-tags">
               <span>Open Source</span><span>Git</span><span>Workspace</span>
             </div>
-            <a href="https://github.com/zerosangam/zero-code" target="_blank" class="explore-link" style="text-decoration: none; color: inherit;">
+            <a href="https://github.com/zerosangam/zero-code" target="_blank" rel="noopener noreferrer" class="explore-link" style="text-decoration: none; color: inherit;">
               Explore <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
             </a>
           </div>
@@ -1076,6 +150,19 @@
     <!-- ============ SKILLS / ARSENAL ============ -->
     <section class="skills-section" id="arsenal">
 
+      <!-- Hacking / Pentesting -->
+<div class="skill-group">
+  <h3>Hacking</h3>
+  <div class="skill-row">
+    <div class="skill-box metasploit"><span>💥</span><span>METASPLOIT</span></div>
+    <div class="skill-box burp"><span>🕷️</span><span>BURP SUITE</span></div>
+    <div class="skill-box wireshark"><span>🦈</span><span>WIRESHARK</span></div>
+    <div class="skill-box nmap"><span>🗺️</span><span>NMAP</span></div>
+    <div class="skill-box hydra"><span>🐍</span><span>HYDRA</span></div>
+    <div class="skill-box sqlmap"><span>🗄️</span><span>SQLMAP</span></div>
+  </div>
+</div>
+
       <!-- Languages -->
       <div class="skill-group">
         <h3>Languages</h3>
@@ -1084,7 +171,7 @@
           <div class="skill-box python"><i class="fa-brands fa-python"></i><span>PYTHON</span></div>
           <div class="skill-box javascript"><i class="fa-brands fa-js"></i><span>JAVASCRIPT</span></div>
           <div class="skill-box html5"><i class="fa-brands fa-html5"></i><span>HTML5</span></div>
-          <div class="skill-box css3"><span>CSS3</span></div>
+          <div class="skill-box css3"><span>CSS</span></div>
         </div>
       </div>
 
@@ -1129,24 +216,27 @@
       </div>
 
       <!-- Automation -->
-      <div class="skill-group">
-        <h3>Automation</h3>
-        <div class="skill-row">
-          <div class="skill-box n8n"><span>⌘</span><span>N8N</span></div>
-          <div class="skill-box telegram"><i class="fa-brands fa-telegram"></i><span>TELEGRAM BOT API</span></div>
-        </div>
-      </div>
-
+<div class="skill-group">
+  <h3>Automation</h3>
+  <div class="skill-row">
+    <div class="skill-box n8n"><span>⌘</span><span>N8N</span></div>
+    <div class="skill-box telegram"><i class="fa-brands fa-telegram"></i><span>TELEGRAM BOT API</span></div>
+    <div class="skill-box antigravity"><span>₩</span><span>Antigravity</span></div>
+    <div class="skill-box playwright"><span>🎭</span><span>PLAYWRIGHT</span></div>
+    <div class="skill-box newman"><span>⚡</span><span>NEWMAN</span></div>
+  </div>
+</div>
       <!-- Tools -->
       <div class="skill-group">
         <h3>Tools</h3>
         <div class="skill-row">
-          <div class="skill-box vscode"><span>VS CODE</span></div>
+          <div class="skill-box vscode"><span>₻</span><span>VS CODE</span></div>
           <div class="skill-box linux"><i class="fa-brands fa-linux"></i><span>LINUX</span></div>
           <div class="skill-box windows"><i class="fa-brands fa-windows"></i><span>WINDOWS</span></div>
           <div class="skill-box postman"><span>◉</span><span>POSTMAN</span></div>
           <div class="skill-box figma"><span>F</span><span>FIGMA</span></div>
-          <div class="skill-box canva"><span>CANVA</span></div>
+          <div class="skill-box canva"><span>௹</span><span>CANVA</span></div>
+          <div class="skill-box capcut"><span>₢</span><span>Cap Cut</span></div>          
         </div>
       </div>
     </section>
@@ -1166,10 +256,10 @@
       <a href="mailto:ffzero8434@gmail.com" class="contact-email magnetic reveal">ffzero8434@gmail.com</a>
 
       <div class="socials reveal">
-        <a href="https://github.com/zerosangam" target="_blank" class="social-icon magnetic" aria-label="GitHub"><i class="fa-brands fa-github" aria-hidden="true"></i></a>
-        <a href="https://www.linkedin.com/in/sangam-kumar-8a72bb436/" target="_blank" class="social-icon magnetic" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in" aria-hidden="true"></i></a>
-        <a href="https://x.com/zerosangam" target="_blank" class="social-icon magnetic" aria-label="Twitter / X"><i class="fa-brands fa-x-twitter" aria-hidden="true"></i></a>
-        <a href="https://www.instagram.com/zero__sangam/?hl=en" target="_blank" class="social-icon magnetic" aria-label="Instagram"><i class="fa-brands fa-instagram" aria-hidden="true"></i></a>
+        <a href="https://github.com/zerosangam" target="_blank" rel="noopener noreferrer" class="social-icon magnetic" aria-label="GitHub"><i class="fa-brands fa-github" aria-hidden="true"></i></a>
+        <a href="https://www.linkedin.com/in/sangam-kumar-8a72bb436/" target="_blank" rel="noopener noreferrer" class="social-icon magnetic" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in" aria-hidden="true"></i></a>
+        <a href="https://x.com/zerosangam" target="_blank" rel="noopener noreferrer" class="social-icon magnetic" aria-label="Twitter / X"><i class="fa-brands fa-x-twitter" aria-hidden="true"></i></a>
+        <a href="https://www.instagram.com/zero__sangam/?hl=en" target="_blank" rel="noopener noreferrer" class="social-icon magnetic" aria-label="Instagram"><i class="fa-brands fa-instagram" aria-hidden="true"></i></a>
         <a href="mailto:sangamkumar813205@gmail.com" class="social-icon magnetic" aria-label="Email"><i class="fa-solid fa-envelope" aria-hidden="true"></i></a>
       </div>
     </section>
@@ -1179,9 +269,19 @@
   <div class="divider" aria-hidden="true"></div>
 
   <footer>
-    <p>© <span id="year"></span> ZERO — EVERY THINK IS A ZERO<span class="footer-heart"></span></p>
+    <p>© <span id="year"></span> ZERO — EVERYTHING IS ZERO<span class="footer-heart"></span></p>
     <p class="mono" style="color:var(--text-dim);font-size:0.7rem;" id="footerGreeting"></p>
   </footer>
+
+  <!-- ============ AI CHAT WIDGET ============ -->
+  <div class="chat-window" id="chatWindow" aria-hidden="true">
+    <iframe class="chat-iframe" id="chatIframe" src="chat.html" title="ZERO.AI Chat"></iframe>
+  </div>
+
+  <button class="chat-toggle" id="chatToggle" aria-label="Toggle ZERO.AI Chat">
+    <i class="fa-solid fa-robot"></i>
+    <span class="chat-badge" id="chatBadge">1</span>
+  </button>
 
   <button class="back-to-top" id="backToTop" aria-label="Back to top">
     <i class="fa-solid fa-arrow-up" aria-hidden="true"></i>
@@ -1240,6 +340,56 @@
       backTop.addEventListener('click', function(){
         window.scrollTo({ top: 0, behavior: reducedMotion ? 'auto' : 'smooth' });
       });
+
+      /* AI CHAT TOGGLE + ESC + IFRAME MESSAGING */
+      var chatToggle = document.getElementById('chatToggle');
+      var chatWindow = document.getElementById('chatWindow');
+      var chatBadge = document.getElementById('chatBadge');
+
+      function openChat(){
+        chatWindow.classList.add('open');
+        chatWindow.setAttribute('aria-hidden', 'false');
+        if(chatBadge) chatBadge.classList.add('hidden');
+      }
+
+      function closeChat(){
+        chatWindow.classList.remove('open');
+        chatWindow.setAttribute('aria-hidden', 'true');
+      }
+
+      function toggleChat(){
+        if(chatWindow.classList.contains('open')){
+          closeChat();
+        } else {
+          openChat();
+        }
+      }
+
+      if(chatToggle && chatWindow){
+        chatToggle.addEventListener('click', toggleChat);
+
+        var heroChatBtn = document.getElementById('heroChatBtn');
+        if(heroChatBtn){
+          heroChatBtn.addEventListener('click', function(e){
+            e.preventDefault();
+            openChat();
+          });
+        }
+
+        /* ESC key to close */
+        window.addEventListener('keydown', function(e){
+          if(e.key === 'Escape' && chatWindow.classList.contains('open')){
+            closeChat();
+          }
+        });
+
+        /* Listen for close message from chat iframe */
+        window.addEventListener('message', function(e){
+          if(e.data === 'closeChat'){
+            closeChat();
+          }
+        });
+      }
 
       /* CUSTOM CURSOR — disabled for dark theme */
       document.body.classList.add('no-fine-cursor');
