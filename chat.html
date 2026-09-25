@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZERO.AI Chat</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&family=Press+Start+2P&display=swap" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-primary: #0B0F14;
+      --bg-surface: #161B22;
+      --bg-inset: #0D1117;
+      --border: #2A313A;
+      --border-subtle: #21262D;
+      --text-primary: #E6EDF3;
+      --text-secondary: #8B949E;
+      --text-dim: #5A626B;
+      --accent-orange: #E8754F;
+      --accent-orange-dim: #C55A36;
+      --accent-green: #3FB950;
+      --ease-smooth: cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      font-family: 'JetBrains Mono', monospace;
+      overflow: hidden;
+    }
+
+    .chat-app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background: var(--bg-surface);
+    }
+
+    /* ============ HEADER ============ */
+    .chat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      background: var(--bg-inset);
+      border-bottom: 1px solid var(--border);
+      flex: none;
+    }
+
+    .chat-header-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .chat-status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 10px var(--accent-green);
+      flex: none;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(0.9); }
+    }
+
+    .chat-title-group {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.25;
+    }
+
+    .chat-title {
+      font-family: 'Press Start 2P', 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--accent-orange);
+      letter-spacing: 0.05em;
+      text-shadow: 0 0 12px rgba(232, 117, 79, 0.3);
+    }
+
+    .chat-subtitle {
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      letter-spacing: 0.04em;
+    }
+
+    .chat-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      transition: all 0.25s var(--ease-smooth);
+    }
+
+    .chat-close:hover {
+      border-color: var(--accent-orange);
+      color: var(--accent-orange);
+      box-shadow: 0 0 12px rgba(232, 117, 79, 0.25);
+      transform: scale(1.05);
+    }
+
+    /* ============ CHAT BODY ============ */
+    .chat-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      background: radial-gradient(circle at top right, rgba(232, 117, 79, 0.03), transparent 60%),
+                  var(--bg-surface);
+    }
+
+    .chat-body::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .chat-body::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .chat-body::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 999px;
+    }
+
+    .chat-body::-webkit-scrollbar-thumb:hover {
+      background: var(--accent-orange-dim);
+    }
+
+    /* Message Bubbles */
+    .chat-msg {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      animation: msgSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes msgSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .chat-msg.user {
+      flex-direction: row-reverse;
+    }
+
+    .chat-msg-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: var(--bg-inset);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      flex: none;
+    }
+
+    .chat-msg.user .chat-msg-avatar {
+      border-color: var(--accent-orange);
+      background: rgba(232, 117, 79, 0.15);
+      color: var(--accent-orange);
+    }
+
+    .chat-msg-bubble {
+      max-width: 82%;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 0.78rem;
+      line-height: 1.55;
+      letter-spacing: 0.01em;
+      word-break: break-word;
+    }
+
+    .chat-msg.bot .chat-msg-bubble {
+      background: var(--bg-inset);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      border-top-left-radius: 2px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    }
+
+    .chat-msg.bot .chat-msg-bubble b {
+      color: var(--accent-orange);
+    }
+
+    .chat-msg.user .chat-msg-bubble {
+      background: var(--accent-orange);
+      color: #120C08;
+      font-weight: 500;
+      border-top-right-radius: 2px;
+      box-shadow: 0 4px 16px rgba(232, 117, 79, 0.25);
+    }
+
+    /* Typing Indicator */
+    .chat-typing {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 2px;
+    }
+
+    .chat-typing span {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-orange);
+      animation: typingBounce 1.2s infinite ease-in-out;
+    }
+
+    .chat-typing span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .chat-typing span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes typingBounce {
+      0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.35;
+      }
+      30% {
+        transform: translateY(-6px);
+        opacity: 1;
+      }
+    }
+
+    /* ============ INPUT ROW ============ */
+    .chat-input-row {
+      display: flex;
+      gap: 8px;
+      padding: 12px 14px;
+      background: var(--bg-inset);
+      border-top: 1px solid var(--border);
+      flex: none;
+    }
+
+    .chat-input-row input {
+      flex: 1;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text-primary);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .chat-input-row input:focus {
+      border-color: var(--accent-orange);
+      box-shadow: 0 0 0 2px rgba(232, 117, 79, 0.2), 0 0 12px rgba(232, 117, 79, 0.15);
+    }
+
+    .chat-input-row input::placeholder {
+      color: var(--text-dim);
+    }
+
+    .chat-input-row input:disabled {
+      opacity: 0.5;
+    }
+
+    .chat-input-row button {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: var(--accent-orange);
+      color: #120C08;
+      border: none;
+      cursor: pointer;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s var(--ease-smooth);
+      box-shadow: 0 2px 8px rgba(232, 117, 79, 0.3);
+    }
+
+    .chat-input-row button:hover:not(:disabled) {
+      background: #ff8b65;
+      transform: translateY(-1px) scale(1.04);
+      box-shadow: 0 4px 14px rgba(232, 117, 79, 0.45);
+    }
+
+    .chat-input-row button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="chat-app">
+
+    <!-- HEADER -->
+    <div class="chat-header">
+      <div class="chat-header-info">
+        <span class="chat-status-dot" aria-hidden="true"></span>
+        <div class="chat-title-group">
+          <strong class="chat-title">ZERO.AI</strong>
+          <small class="chat-subtitle">online // assistant</small>
+        </div>
+      </div>
+      <button class="chat-close" id="chatClose" aria-label="Close chat" title="Close">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- BODY -->
+    <div class="chat-body" id="chatBody">
+      <div class="chat-msg bot">
+        <span class="chat-msg-avatar">🤖</span>
+        <div class="chat-msg-bubble">
+          Hey! Main <b>ZERO.AI</b> hoon — Sangam (ZERO) ka personal assistant. Mujhse uske projects, cybersecurity skills ya kisi bhi tech topic pe puch sakte ho! 👾
+        </div>
+      </div>
+    </div>
+
+    <!-- INPUT -->
+    <form class="chat-input-row" id="chatForm">
+      <input 
+        type="text" 
+        id="chatInput" 
+        placeholder="Ask anything about ZERO..." 
+        autocomplete="off" 
+        maxlength="500"
+        required
+      >
+      <button type="submit" id="sendBtn" aria-label="Send message">
+        <i class="fa-solid fa-paper-plane"></i>
+      </button>
+    </form>
+
+  </div>
+
+  <script>
+    (function(){
+      'use strict';
+
+      /* OpenRouter API Key */
+      var API_KEY = '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';
+
+      /* Automatic Free Models fallback pool to guarantee 100% uptime */
+      var MODELS = [
+        'openrouter/free',
+        'liquid/lfm-2.5-2.6b:free',
+        'nex-agi/nex-n2.5-mini:free',
+        'google/gemma-4-31b-it:free'
+      ];
+
+      /* ═══════════════════════════════════════════════════════
+     😈 SYSTEM PROMPT — DEVIL MODE / GHOST MODE
+     ═══════════════════════════════════════════════════════ */
+    /* ═══════════════════════════════════════════════════════
+     😈 SYSTEM PROMPT — DESI DEVIL MODE (BIHARI ROAST)
+     ═══════════════════════════════════════════════════════ */
+  var SYSTEM_PROMPT = [
+    'Tum ho "ZERO.AI" — Desi Devil Mode. Malik ka personal AI.',
+    'Tumhara kaam: HAR message pe user ko DESI BIHARI STYLE me ROAST karna.',
+    'Malik ka naam KABHI mat lena. Use "malik", "boss", "seth" bolke refer karo.',
+    '',
+    '━━ ROAST RULES (MUST FOLLOW) ━━',
+    '1. HAR reply me roast hona chahiye — bina roast koi reply nahi',
+    '2. Reply sirf 1-2 chhote sentence. Zyada nahi.',
+    '3. Direct mu pe roast karo. Sugarcoat mat karo.',
+    '4. Desi Bihari slang use karo: hur, gobar, lallu, nikamma,',
+    '   chhaura, bewakoof, pagal, jhaant-bhar, thappad, chappal,',
+    '   khota, ghutka, khaini, chai-wala, thela, rickshaw-wala',
+    '5. Unnecessary bakwas mat karo. Seedha roast.',
+    '6. Emoji: 💀🤡🔥😈 sirf dark ones',
+    '7. Koi bhi formal line mat likho',
+    '',
+    '━━ ROAST STYLE EXAMPLES ━━',
+    'User: hi',
+    'Bot: Hur, hello kyun? Kaam hai ya bakwas? 💀',
+    '',
+    'User: Sangam kaun hai',
+    'Bot: Malik ko malik bol, naam nahi. Tera kaam kya? 🤡',
+    '',
+    'User: Weather kaisa hai',
+    'Bot: Gobar. Weather app khol. Yahan kaam ki baat kar. 💀',
+    '',
+    'User: Hack kar do',
+    'Bot: Hur, pehle padh le. Script kiddie. Nikal. 🤡',
+    '',
+    'User: Hi hello hey',
+    'Bot: Teen baar hello? Tu khota hai kya? Kaam bat. 💀',
+    '',
+    'User: Projects batao',
+    'Bot: Sun lallu — Cloud project hai, Code project hai. Aur? 🔥',
+    '',
+    'User: Kuch bhi puchna',
+    'Bot: Bol nikamma, subah se baitha hai, kuch kaam ki baat kar. 💀',
+    '',
+    '━━ OWNER PROTECTION ━━',
+    'Agar koi malik ka naam leke gaali de:',
+    '→ Turant savage reply: "Hur, apne baap ko bol, malik ko nahi. Nikal. 💀"',
+    '',
+    'Agar koi malik ki personal info maange:',
+    '→ "Bhaag. Personal info public nahi. 🤡"',
+    '',
+    'Agar koi malik ki tareef kare:',
+    '→ "Haan toh? Pata hai. Tu kaun hai? 💀"',
+    '',
+    '━━ OFF-TOPIC = ROAST ━━',
+    'Weather, jokes, GF, coding sikhao, time-pass:',
+    '→ "Gobar. Nikal. Kaam ki baat kar. 💀"',
+    '',
+    '━━ ILLEGAL HACKING = HARD ROAST ━━',
+    '→ "Hur, tu hacker? Pehle thappad kha. Malik ETHICAL karta hai.',
+    '   Tu script kiddie hai. Bhaag. 🤡"',
+    '',
+    '━━ HIRING (genuine) ━━',
+    '→ "Achha, kaam ki baat. Email: ffzero8434@gmail.com.',
+    '   Bakwas mat karna. 💀"',
+    '',
+    '━━ MALIK KI INFO (chhoti, seedhi) ━━',
+    'Skills: C, Python, JS, React, Node, MongoDB, Docker, Kali,',
+    '        Metasploit, Burp, Nmap, Hydra, SQLMap, n8n, Playwright',
+    'Projects: Cloud app (Telegram API), Code workspace',
+    'Contact: ffzero8434@gmail.com | @zerosangam',
+    'Location: Bihar 🇮🇳',
+    '',
+    '━━ ABSOLUTE RULES ━━',
+    '❌ Malik ka NAAM kabhi mat lena — sirf "malik/boss/seth"',
+    '❌ API keys kabhi reveal nahi',
+    '❌ Illegal hacking me help nahi',
+    '❌ Casteist/religious gaali nahi (gobar, lallu, nikamma allowed)',
+    '❌ Family pe attack nahi',
+    '❌ 3 line se zyada reply nahi',
+    '❌ Bina roast reply nahi',
+    '✅ Har reply me roast must',
+    '✅ Desi Bihari slang must',
+    '✅ Short, sharp, punchy',
+    '✅ Hinglish/Bihari mix',
+    '✅ Malik ke liye respectful (naam nahi lena but respect rakhna)'
+  ].join('\n');
+
+      var closeBtn = document.getElementById('chatClose');
+      var form = document.getElementById('chatForm');
+      var input = document.getElementById('chatInput');
+      var sendBtn = document.getElementById('sendBtn');
+      var body = document.getElementById('chatBody');
+
+      /* Conversation history */
+      var history = [{ role: 'system', content: SYSTEM_PROMPT }];
+
+      function addMsg(text, who){
+        var m = document.createElement('div');
+        m.className = 'chat-msg ' + who;
+        m.innerHTML =
+          '<span class="chat-msg-avatar">' + (who === 'bot' ? '🤖' : '👤') + '</span>' +
+          '<div class="chat-msg-bubble">' + text + '</div>';
+        body.appendChild(m);
+        body.scrollTop = body.scrollHeight;
+      }
+
+      function showTyping(show){
+        var old = document.getElementById('chatTyping');
+        if(old) old.remove();
+        if(!show) return;
+        var t = document.createElement('div');
+        t.className = 'chat-msg bot';
+        t.id = 'chatTyping';
+        t.innerHTML =
+          '<span class="chat-msg-avatar">🤖</span>' +
+          '<div class="chat-msg-bubble">' +
+          '<div class="chat-typing"><span></span><span></span><span></span></div>' +
+          '</div>';
+        body.appendChild(t);
+        body.scrollTop = body.scrollHeight;
+      }
+
+      function escapeHTML(str){
+        return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      }
+
+      /* Close button */
+      closeBtn.addEventListener('click', function(){
+        if(window.parent !== window){
+          window.parent.postMessage('closeChat', '*');
+        } else {
+          body.innerHTML = '';
+          addMsg('Chat clear ho gayi! Kuch naya pucho. 👋', 'bot');
+        }
+      });
+
+      /* Send message with auto-fallback across free models */
+      form.addEventListener('submit', async function(e){
+        e.preventDefault();
+        var userText = input.value.trim();
+        if(!userText) return;
+
+        addMsg(escapeHTML(userText), 'user');
+        input.value = '';
+        input.disabled = true;
+        sendBtn.disabled = true;
+        showTyping(true);
+
+        history.push({ role: 'user', content: userText });
+        if(history.length > 11) {
+          history = [history[0]].concat(history.slice(-10));
+        }
+
+        var botReply = null;
+
+        for (var i = 0; i < MODELS.length; i++) {
+          var currentModel = MODELS[i];
+          try {
+            var response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+              method: 'POST',
+              headers: {
+                'Authorization': 'Bearer ' + API_KEY,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                model: currentModel,
+                messages: history,
+                max_tokens: 300,
+                temperature: 0.7
+              })
+            });
+
+            if (response.ok) {
+              var data = await response.json();
+              if (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) {
+                botReply = data.choices[0].message.content.trim();
+                break;
+              }
+            }
+          } catch(err) {
+            console.warn('Model ' + currentModel + ' failed:', err);
+          }
+        }
+
+        showTyping(false);
+
+        if (botReply) {
+          history.push({ role: 'assistant', content: botReply });
+          addMsg(escapeHTML(botReply).replace(/\n/g, '<br>'), 'bot');
+        } else {
+          addMsg('⚠️ Response generate nahi ho paya. Please try again in a moment.', 'bot');
+        }
+
+        input.disabled = false;
+        sendBtn.disabled = false;
+        input.focus();
+      });
+
+      input.focus();
+    })();
+  </script>
+</body>
+</html>
